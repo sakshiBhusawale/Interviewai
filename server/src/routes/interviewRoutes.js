@@ -1,7 +1,7 @@
 import express from 'express';
 import { generateQuestions } from '../controllers/interviewController.js';
 import { handleEvaluation } from '../controllers/evaluationController.js';
-import { handleSimulation } from '../controllers/simulationController.js';
+import { handleSimulation, handleSimulationEvaluation } from '../controllers/simulationController.js';
 import { handleMCQGeneration } from '../controllers/mcqController.js';
 
 const router = express.Router();
