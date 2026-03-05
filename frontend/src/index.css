@@ -1,0 +1,164 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #1f2937;
+  background-color: #f9fafb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #f9fafb;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.saas-card {
+  border-radius: 0.875rem;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.field-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.field-control {
+  width: 100%;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
+  padding: 0 0.75rem;
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.field-control:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.pill-btn,
+.pill-btn-active {
+  height: 2.5rem;
+  border-radius: 0.7rem;
+  border: 1px solid #d1d5db;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all 120ms ease;
+}
+
+.pill-btn {
+  background: #ffffff;
+  color: #374151;
+}
+
+.pill-btn:hover {
+  border-color: #a5b4fc;
+  color: #312e81;
+}
+
+.pill-btn-active {
+  border-color: #4f46e5;
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.primary-btn {
+  width: 100%;
+  height: 2.8rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  transition: background 140ms ease, transform 140ms ease;
+}
+
+.primary-btn:hover {
+  background: #4338ca;
+  transform: translateY(-1px);
+}
+
+.primary-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.copy-btn {
+  border: 1px solid #d1d5db;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  color: #374151;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.copy-btn:hover {
+  border-color: #a5b4fc;
+  color: #3730a3;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 200ms ease-out;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 37%, #f3f4f6 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s ease infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
