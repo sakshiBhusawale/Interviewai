@@ -1,4 +1,5 @@
 import { evaluateAnswer } from '../services/evaluationService.js';
+import Result from '../models/Result.js';
 
 export const handleEvaluation = async (req, res) => {
     const { question, answer } = req.body;
@@ -9,6 +10,20 @@ export const handleEvaluation = async (req, res) => {
 
     try {
         const result = await evaluateAnswer(question, answer);
+
+        // Save evaluation if userId is provided
+        if (req.body.userId) {
+            await Result.create({
+                userId: req.body.userId,
+                type: 'Interview',
+                score: result.score, // Assuming evaluationService returns a score out of 10
+                totalScore: 10,
+                category: req.body.category || 'General',
+                skill: req.body.skill,
+                difficulty: req.body.difficulty
+            });
+        }
+
         res.json({ success: true, data: result });
     } catch (error) {
         res.status(500).json({ message: error.message });

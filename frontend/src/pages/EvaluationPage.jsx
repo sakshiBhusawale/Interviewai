@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Send, Loader2, CheckCircle2, AlertCircle, Award, Lightbulb, ArrowRight } from 'lucide-react';
 
@@ -8,6 +9,7 @@ const EvaluationPage = () => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState('');
+    const { user } = useAuth();
 
     const handleEvaluate = async (e) => {
         e.preventDefault();
@@ -21,7 +23,12 @@ const EvaluationPage = () => {
             const response = await fetch('http://localhost:5000/api/evaluate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question, answer }),
+                body: JSON.stringify({
+                    question,
+                    answer,
+                    userId: user?._id || user?.id,
+                    category: 'Self Assessment'
+                }),
             });
 
             const data = await response.json();

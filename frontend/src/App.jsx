@@ -12,6 +12,7 @@ import SimulationPage from './pages/SimulationPage'
 import ExamsPage from './pages/ExamsPage'
 import MockTestPage from './pages/MockTestPage'
 import GuidePage from './pages/GuidePage'
+import DashboardPage from './pages/DashboardPage'
 
 const normalizeQuestions = (payload) => {
   if (!payload) return []
@@ -167,6 +168,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<Generator />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/evaluate" element={<EvaluationPage />} />

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Send, Sparkles, AlertCircle, CheckCircle2, Trophy, ArrowRight, Loader2, RefreshCcw, BookOpen, LayoutGrid, ChevronRight, ChevronLeft, Lightbulb } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const MockTestPage = () => {
     const { examId } = useParams();
@@ -14,7 +15,45 @@ const MockTestPage = () => {
     const [isFinished, setIsFinished] = useState(false);
     const [timeLeft, setTimeLeft] = useState(5400); // 90 minutes default
     const [activeSection, setActiveSection] = useState('');
+    const [cheatWarning, setCheatWarning] = useState(false);
+    const { user } = useAuth();
     const chatEndRef = useRef(null);
+
+    useEffect(() => {
+        const handleBlur = () => {
+            if (questions.length > 0 && !isFinished) {
+                setCheatWarning(true);
+            }
+        };
+
+        const handleContextMenu = (e) => {
+            if (questions.length > 0 && !isFinished) {
+                e.preventDefault();
+            }
+        };
+
+        const handleKeyDown = (e) => {
+            if (questions.length > 0 && !isFinished) {
+                if (
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
+                    (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's')) ||
+                    e.key === 'F12'
+                ) {
+                    e.preventDefault();
+                }
+            }
+        };
+
+        window.addEventListener('blur', handleBlur);
+        window.addEventListener('contextmenu', handleContextMenu);
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('blur', handleBlur);
+            window.removeEventListener('contextmenu', handleContextMenu);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [questions.length, isFinished]);
 
     useEffect(() => {
         fetchMCQs();
@@ -57,8 +96,25 @@ const MockTestPage = () => {
         setSelectedAnswers({ ...selectedAnswers, [currentIndex]: option });
     };
 
-    const finishTest = () => {
+    const finishTest = async () => {
         setIsFinished(true);
+        const score = calculateScore();
+
+        try {
+            await fetch('http://localhost:5000/api/results/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user?._id || user?.id,
+                    type: 'MCQ',
+                    score: score,
+                    totalScore: questions.length,
+                    category: examId || 'General'
+                }),
+            });
+        } catch (err) {
+            console.error('Failed to save test result:', err);
+        }
     };
 
     const calculateScore = () => {
@@ -170,10 +226,10 @@ const MockTestPage = () => {
                                         <div
                                             key={i}
                                             className={`p-4 rounded-2xl border-2 text-sm font-medium ${opt === q.correctAnswer
-                                                    ? 'border-green-500 bg-green-50 text-green-700'
-                                                    : selectedAnswers[idx] === opt
-                                                        ? 'border-red-500 bg-red-50 text-red-700'
-                                                        : 'border-gray-50 bg-gray-50 text-gray-500'
+                                                ? 'border-green-500 bg-green-50 text-green-700'
+                                                : selectedAnswers[idx] === opt
+                                                    ? 'border-red-500 bg-red-50 text-red-700'
+                                                    : 'border-gray-50 bg-gray-50 text-gray-500'
                                                 }`}
                                         >
                                             {opt}
@@ -205,7 +261,34 @@ const MockTestPage = () => {
     const currentQ = questions[currentIndex];
 
     return (
-        <div className="pt-24 pb-20 px-4 sm:px-6 bg-[#F9FAFB] min-h-screen">
+        <div className="pt-24 pb-20 px-4 sm:px-6 bg-[#F9FAFB] min-h-screen relative">
+
+            {/* Anti-Cheat Warning Overlay */}
+            <AnimatePresence>
+                {cheatWarning && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-white/80 backdrop-blur-sm p-6"
+                    >
+                        <div className="bg-white border-2 border-red-500 rounded-[40px] p-10 max-w-md text-center shadow-2xl relative">
+                            <AlertCircle className="w-20 h-20 text-red-500 mx-auto mb-6" />
+                            <h2 className="text-3xl font-black text-gray-900 mb-4 uppercase tracking-tight">Cheat Detection</h2>
+                            <p className="text-gray-600 mb-8 font-medium leading-relaxed">
+                                You are not allowed to switch tabs or leave the test window. This incident has been recorded.
+                            </p>
+                            <button
+                                onClick={() => setCheatWarning(false)}
+                                className="w-full h-14 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100"
+                            >
+                                I am sorry, I'll continue
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <div className="max-w-7xl mx-auto">
 
                 {/* Test Header */}
@@ -235,8 +318,8 @@ const MockTestPage = () => {
                                             setCurrentIndex(firstInSec);
                                         }}
                                         className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeSection === sec
-                                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
-                                                : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
+                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
+                                            : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
                                             }`}
                                     >
                                         {sec}
@@ -293,13 +376,13 @@ const MockTestPage = () => {
                                             key={idx}
                                             onClick={() => handleSelect(option)}
                                             className={`p-6 rounded-3xl border-2 text-left transition-all relative group flex items-center gap-4 ${selectedAnswers[currentIndex] === option
-                                                    ? 'border-indigo-600 bg-indigo-50/50'
-                                                    : 'border-gray-50 bg-gray-50/30 hover:bg-white hover:border-gray-200'
+                                                ? 'border-indigo-600 bg-indigo-50/50'
+                                                : 'border-gray-50 bg-gray-50/30 hover:bg-white hover:border-gray-200'
                                                 }`}
                                         >
                                             <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 border-2 transition-all ${selectedAnswers[currentIndex] === option
-                                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100'
-                                                    : 'bg-white border-gray-100 text-gray-400 group-hover:border-indigo-200 group-hover:text-indigo-600'
+                                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100'
+                                                : 'bg-white border-gray-100 text-gray-400 group-hover:border-indigo-200 group-hover:text-indigo-600'
                                                 }`}>
                                                 {String.fromCharCode(65 + idx)}
                                             </div>
@@ -364,10 +447,10 @@ const MockTestPage = () => {
                                             setActiveSection(questions[idx].section || 'General');
                                         }}
                                         className={`w-12 h-12 rounded-2xl font-black text-xs transition-all border-2 flex items-center justify-center ${currentIndex === idx
-                                                ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-lg shadow-indigo-100 scale-110 z-10'
-                                                : selectedAnswers[idx]
-                                                    ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-100'
-                                                    : 'bg-gray-50 border-gray-50 text-gray-400 hover:border-gray-200'
+                                            ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-lg shadow-indigo-100 scale-110 z-10'
+                                            : selectedAnswers[idx]
+                                                ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-100'
+                                                : 'bg-gray-50 border-gray-50 text-gray-400 hover:border-gray-200'
                                             }`}
                                     >
                                         {idx + 1}

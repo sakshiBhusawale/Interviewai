@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/generate', generateQuestions);
 router.post('/evaluate', handleEvaluation);
 router.post('/simulate', handleSimulation);
+router.post('/simulate/evaluate', handleSimulationEvaluation);
 router.post('/mcq/generate', handleMCQGeneration);
 
 export default router;

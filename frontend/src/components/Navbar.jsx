@@ -26,6 +26,7 @@ const Navbar = () => {
                     </Link>
                     <div className="hidden md:flex items-center gap-8">
                         <Link to="/" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">Generator</Link>
+                        <Link to="/dashboard" className="text-sm font-medium text-indigo-600 font-bold bg-indigo-50 px-3 py-1.5 rounded-xl transition-all">Dashboard</Link>
                         <Link to="/evaluate" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">Evaluate</Link>
                         <Link to="/simulate" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">Simulate</Link>
                         <Link to="/exams" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">Exams</Link>
