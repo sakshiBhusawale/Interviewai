@@ -1,3 +1,4 @@
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Send, Loader2, User, Bot, Terminal, RefreshCcw, LogOut, Award, CheckCircle2, Lightbulb, ArrowRight, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
