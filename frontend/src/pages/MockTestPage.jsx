@@ -16,6 +16,7 @@ const MockTestPage = () => {
     const [timeLeft, setTimeLeft] = useState(5400); // 90 minutes default
     const [activeSection, setActiveSection] = useState('');
     const [cheatWarning, setCheatWarning] = useState(false);
+    const [isFlagged, setIsFlagged] = useState(false);
     const { user } = useAuth();
     const chatEndRef = useRef(null);
 
@@ -23,6 +24,14 @@ const MockTestPage = () => {
         const handleBlur = () => {
             if (questions.length > 0 && !isFinished) {
                 setCheatWarning(true);
+                setIsFlagged(true);
+            }
+        };
+
+        const handleFullscreenChange = () => {
+            if (questions.length > 0 && !isFinished && !document.fullscreenElement) {
+                setCheatWarning(true);
+                setIsFlagged(true);
             }
         };
 
@@ -47,11 +56,13 @@ const MockTestPage = () => {
         window.addEventListener('blur', handleBlur);
         window.addEventListener('contextmenu', handleContextMenu);
         window.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
 
         return () => {
             window.removeEventListener('blur', handleBlur);
             window.removeEventListener('contextmenu', handleContextMenu);
             window.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
         };
     }, [questions.length, isFinished]);
 
@@ -79,6 +90,12 @@ const MockTestPage = () => {
             const data = await response.json();
             if (response.ok) {
                 setQuestions(data.data);
+                setIsFlagged(false);
+                try {
+                    await document.documentElement.requestFullscreen();
+                } catch (err) {
+                    console.error('Failed to enter fullscreen:', err);
+                }
                 if (data.data.length > 0) {
                     setActiveSection(data.data[0].section || 'General');
                 }
@@ -109,7 +126,8 @@ const MockTestPage = () => {
                     type: 'MCQ',
                     score: score,
                     totalScore: questions.length,
-                    category: examId || 'General'
+                    category: examId || 'General',
+                    wasFlagged: isFlagged
                 }),
             });
         } catch (err) {

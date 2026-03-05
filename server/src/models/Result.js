@@ -33,6 +33,10 @@ const resultSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    wasFlagged: {
+        type: Boolean,
+        default: false,
+    }
 });
 
 export default mongoose.model('Result', resultSchema);

@@ -165,7 +165,7 @@ const DashboardPage = () => {
                                         dataKey="date"
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 700 }}
+                                        tick={{ fill: '#9CA3AF', fontSize: 10, fontWeight: 700 }}
                                         dy={10}
                                     />
                                     <YAxis
@@ -175,15 +175,27 @@ const DashboardPage = () => {
                                         domain={[0, 100]}
                                     />
                                     <Tooltip
-                                        contentStyle={{
-                                            backgroundColor: '#111827',
-                                            border: 'none',
-                                            borderRadius: '16px',
-                                            color: '#fff',
-                                            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                                        content={({ active, payload }) => {
+                                            if (active && payload && payload.length) {
+                                                const data = payload[0].payload;
+                                                return (
+                                                    <div className="bg-gray-900 p-4 rounded-2xl border border-gray-800 shadow-2xl">
+                                                        <p className="text-gray-400 text-[10px] font-black uppercase mb-1">{data.date}</p>
+                                                        <div className="flex items-center justify-between gap-4">
+                                                            <span className="text-indigo-400 font-bold">Score:</span>
+                                                            <span className="text-white font-black">{data.score}%</span>
+                                                        </div>
+                                                        {data.wasFlagged && (
+                                                            <div className="flex items-center gap-2 mt-2 px-2 py-1 bg-red-500/10 rounded-lg">
+                                                                <AlertCircle className="w-3 h-3 text-red-500" />
+                                                                <span className="text-[10px] text-red-400 font-bold uppercase">Security Flagged</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
                                         }}
-                                        itemStyle={{ color: '#818CF8', fontWeight: 'bold' }}
-                                        labelStyle={{ color: '#9CA3AF', marginBottom: '4px' }}
                                     />
                                     <Area
                                         type="monotone"

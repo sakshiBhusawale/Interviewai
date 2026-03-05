@@ -17,7 +17,7 @@ export const handleSimulation = async (req, res) => {
 };
 
 export const handleSimulationEvaluation = async (req, res) => {
-    const { messages, userId, category, skill, difficulty } = req.body;
+    const { messages, userId, category, skill, difficulty, wasFlagged } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ message: 'Messages array is required' });
@@ -35,7 +35,8 @@ export const handleSimulationEvaluation = async (req, res) => {
                 totalScore: 10,
                 category: category || 'General',
                 skill: skill,
-                difficulty: difficulty
+                difficulty: difficulty,
+                wasFlagged: !!wasFlagged
             });
         }
 

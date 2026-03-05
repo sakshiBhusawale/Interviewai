@@ -10,6 +10,7 @@ const SimulationPage = () => {
     const [started, setStarted] = useState(false);
     const [cheatWarning, setCheatWarning] = useState(false);
     const [evaluation, setEvaluation] = useState(null);
+    const [isFlagged, setIsFlagged] = useState(false);
     const { user } = useAuth();
     const chatEndRef = useRef(null);
 
@@ -17,7 +18,14 @@ const SimulationPage = () => {
         const handleBlur = () => {
             if (started) {
                 setCheatWarning(true);
-                // You could also log this to the server here
+                setIsFlagged(true);
+            }
+        };
+
+        const handleFullscreenChange = () => {
+            if (started && !document.fullscreenElement) {
+                setCheatWarning(true);
+                setIsFlagged(true);
             }
         };
 
@@ -43,11 +51,13 @@ const SimulationPage = () => {
         window.addEventListener('blur', handleBlur);
         window.addEventListener('contextmenu', handleContextMenu);
         window.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
 
         return () => {
             window.removeEventListener('blur', handleBlur);
             window.removeEventListener('contextmenu', handleContextMenu);
             window.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
         };
     }, [started]);
 
@@ -60,8 +70,14 @@ const SimulationPage = () => {
     }, [messages]);
 
     const startInterview = async () => {
+        try {
+            await document.documentElement.requestFullscreen();
+        } catch (err) {
+            console.error('Failed to enter fullscreen:', err);
+        }
         setStarted(true);
         setLoading(true);
+        setIsFlagged(false);
         const initialMessages = [
             { role: 'user', content: 'Hi, I am ready to start the interview. Please ask me the first question.' }
         ];
@@ -121,7 +137,8 @@ const SimulationPage = () => {
                 body: JSON.stringify({
                     messages,
                     userId: user?._id || user?.id,
-                    category: 'Technical Interview'
+                    category: 'Technical Interview',
+                    wasFlagged: isFlagged
                 }),
             });
             const data = await response.json();

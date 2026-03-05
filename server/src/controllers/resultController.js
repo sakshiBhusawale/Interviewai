@@ -5,7 +5,7 @@ import Result from '../models/Result.js';
 // @access  Private
 export const saveResult = async (req, res) => {
     try {
-        const { userId, type, score, totalScore, category, skill, difficulty } = req.body;
+        const { userId, type, score, totalScore, category, skill, difficulty, wasFlagged } = req.body;
 
         if (!userId || !type || score === undefined || !totalScore || !category) {
             return res.status(400).json({ success: false, message: 'Please provide all required fields' });
@@ -18,7 +18,8 @@ export const saveResult = async (req, res) => {
             totalScore,
             category,
             skill,
-            difficulty
+            difficulty,
+            wasFlagged: !!wasFlagged
         });
 
         res.status(201).json({ success: true, data: result });
@@ -40,16 +41,18 @@ export const getProgressData = async (req, res) => {
         const chartData = results.reduce((acc, curr) => {
             const date = new Date(curr.createdAt).toLocaleDateString();
             if (!acc[date]) {
-                acc[date] = { date, score: 0, count: 0 };
+                acc[date] = { date, score: 0, count: 0, wasFlagged: false };
             }
             acc[date].score += (curr.score / curr.totalScore) * 100;
             acc[date].count += 1;
+            if (curr.wasFlagged) acc[date].wasFlagged = true;
             return acc;
         }, {});
 
         const formattedData = Object.values(chartData).map(day => ({
             date: day.date,
-            score: Math.round(day.score / day.count)
+            score: Math.round(day.score / day.count),
+            wasFlagged: day.wasFlagged
         }));
 
         res.json({ success: true, data: formattedData });
